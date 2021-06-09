@@ -91,15 +91,8 @@ def get_user_message_counts(users):
     # Get the total number of messages in the group
     total_messages = int(request['response']['count'])
 
-    # Create a variable to track remaining messages
-    remaining_messages = total_messages
-
-    # Set queries value with the number of queries done. This information is tracked because you
-    # can only send so many requests within a certain amount of time, or you will get an error.
-    #queries = 1
-
-    while remaining_messages > 0:
-    #for _ in range(100):
+    # Determine the number of batches needed to cover the dataset and iterate over them
+    for _ in range(total_messages//20):
         # For each message in the request response
         for message in request['response']['messages']:
             sender = message['sender_id']
@@ -111,34 +104,21 @@ def get_user_message_counts(users):
             else:
                 message_counts[sender] += 1
 
-        # Get the next set of messages if there is more than a batch left
-        if remaining_messages >= 20:
+        # Update the request params to include the last message id
+        params = {
+            'before_id' : f'{message_id}'
+        }
 
-            # Update the request params to include the last message id
-            params = {
-                'before_id' : f'{message_id}'
-            }
+        # Get next set of messages. In the event of a ConnectionError, wait for a cooldown
+        # period and then try again
+        try:
+            r = requests.get(f'{base_url}/{url_params}?token={access_token}', params)
+        except requests.exceptions.ConnectionError:
+            time.sleep(60)
+            r = requests.get(f'{base_url}/{url_params}?token={access_token}', params)
 
-            # Get next set of messages. In the event of a ConnectionError, wait for a cooldown
-            # period and then try again
-            try:
-                r = requests.get(f'{base_url}/{url_params}?token={access_token}', params)
-            except requests.exceptions.ConnectionError:
-                time.sleep(60)
-                r = requests.get(f'{base_url}/{url_params}?token={access_token}', params)
+        request = r.json()
 
-            request = r.json()
-
-            # Decrement the number of messages left
-            remaining_messages -= 20
-            # Add number of queries done in this batch
-            # queries += 1
-
-            # if queries == 30:
-            #     time.sleep(60)
-            #     queries = 0
-
-    #print(json.dumps(request, indent=4))
     return message_counts
 
 if __name__ == "__main__":

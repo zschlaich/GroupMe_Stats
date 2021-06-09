@@ -6,3 +6,6 @@ The goal of this project is to take information from a specific group, and deter
 <li>How many messages has this user liked?</li>
 <br>
 As development continues, more potential statistics will be determined. This information will be gathered using the GroupMe API.
+## Usage Guide
+## Planned Features
+# User 
