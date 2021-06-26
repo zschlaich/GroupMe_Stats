@@ -9,48 +9,116 @@ how many messages they've liked, how many likes received, etc.
 class GroupMember():
     """Class representation of a GroupMe group chat member.
     """
-    
+
     # Initialize a GroupMember
     def __init__(self, user_id, name=''):
-        self.__user_id = user_id
-        self.__name = name
-        self.__message_count = 0
-        self.__likes_given = {}
-        self.__likes_received = {}
+        self.user_id = user_id
+        self.name = name
+        self._message_count = 0
+        self._likes_given = {}
+        self._likes_received = {}
 
-    # Get methods for each of the class fields
+    # Getter property method for the user_id field
+    @property
+    def user_id(self):
+        return self._user_id
 
-    def get_user_id(self):
-        return self.__user_id
+    # Setter property method for the user_id field
+    @user_id.setter
+    def user_id(self, id):
+        if isinstance(id, int):
+            self._user_id = id
+        else:
+            print('The user id should be an int! Please try again.')
 
-    def get_name(self):
-        return self.__name
+    # Getter property method for the name field
+    @property
+    def name(self):
+        return self._name
 
-    def get_message_count(self):
-        return self.__message_count
+    # Setter property method for the name field
+    @name.setter
+    def name(self, new_name):
+        if isinstance(new_name, str):
+            self._name = new_name
+        else:
+            print('The user id should be a str! Please try again.')
+    
+    # Getter property method for the message_count field
+    @property
+    def message_count(self):
+        return self._message_count
 
-    def get_likes_given(self):
-        return self.__likes_given
+    # Getter property method for the likes_given field
+    @property
+    def likes_given(self):
+        return self._likes_given
 
-    def get_likes_received(self):
-        return self.__get_likes_received
+    # Getter property method for the likes_received field
+    @property
+    def likes_received(self):
+        return self._likes_received
 
     def add_message(self):
-        self.__message_count += 1
+        """Increment the message_count field by one.
+        """
+        self._message_count += 1
 
     def add_like_given(self, recipient_id):
         """Add a 'like' given to the receiving user's entry in the likes
         given dictionary.
         """
-        if recipient_id not in self.__likes_given:
-            self.__likes_given[recipient_id] = 1
+        if recipient_id not in self.likes_given:
+            self._likes_given[recipient_id] = 1
         else:
-            self.__likes_given[recipient_id] += 1
+            self._likes_given[recipient_id] += 1
 
     def add_like_received(self, liker_id):
         """Add a 'like' received from the giver in this user's likes given dictionary.
         """
-        if liker_id not in self.__likes_given:
-            self.__likes_given[liker_id] = 1
+        if liker_id not in self.likes_received:
+            self._likes_received[liker_id] = 1
         else:
-            self.__likes_given[liker_id] += 1
+            self._likes_received[liker_id] += 1
+
+    def total_likes_given(self):
+        """Find the total number of likes given while a member of this group chat.
+        """
+        # Set variable
+        likes = 0
+
+        # Get a dict_keys object so we can check the number of entries
+        key_list = self.likes_given.keys()
+
+        # If the user has given likes, sum all of them up
+        if len(key_list) != 0:
+            for user_id in key_list:
+                likes += self.likes_given[user_id]
+
+        return likes
+
+    def total_likes_received(self):
+        """Find the total number of likes received while a member of this group chat.
+        """
+        # Set variable
+        likes = 0
+
+        # Get a dict_keys object so we can check the number of entries
+        key_list = self.likes_received.keys()
+
+        # If the user has received likes, sum all of them up
+        if len(key_list) != 0:
+            for user_id in key_list:
+                likes += self.likes_received[user_id]
+
+        return likes
+
+    # Define built-in object methods
+
+    def __str__(self):
+        return f'{self.name}'
+
+    def __repr__(self):
+        repr_str = (f"group_member.GroupMember({self.user_id}, '{self.name}',"
+                    f" {self.message_count}, {self.total_likes_given()}, {self.total_likes_received()})")
+        return repr_str
